@@ -26,10 +26,10 @@
 static bool geo_boundary_is_empty(const GeoBoundary *boundary);
 static bool geo_boundary_is_closed(const GeoBoundary *boundary);
 
-static size_t geo_boundary_array_data_size(const GeoBoundary **boundaries, int num);
+static size_t geo_boundary_array_data_size(const GeoBoundary *boundaries, int num);
 static size_t geo_boundary_data_size(const GeoBoundary *boundary);
 
-static uint8* wkb_write_geo_boundary_array_data(uint8 *data, const GeoBoundary **boundaries, int num);
+static uint8* wkb_write_geo_boundary_array_data(uint8 *data, const GeoBoundary *boundaries, int num);
 static uint8* wkb_write_geo_boundary_data(uint8 *data, const GeoBoundary *boundary);
 static uint8* wkb_write_geo_coord_array(uint8 *data, const GeoCoord *coord, int num);
 static uint8* wkb_write_geo_coord(uint8 *data, const GeoCoord *coord);
@@ -38,7 +38,7 @@ static uint8* wkb_write_endian(uint8 *data);
 static uint8* wkb_write_int(uint8 *data, uint32 value);
 static uint8* wkb_write(uint8 *data, const void *value, size_t size);
 
-bytea* geo_boundary_array_to_wkb(const GeoBoundary **boundaries, size_t num)
+bytea* geo_boundary_array_to_wkb(const GeoBoundary *boundaries, size_t num)
 {
 	uint8 *data;
 	bytea *wkb;
@@ -89,12 +89,12 @@ bool geo_boundary_is_closed(const GeoBoundary *boundary)
 		&& verts[1].lat == verts[numVerts - 1].lat;
 }
 
-size_t geo_boundary_array_data_size(const GeoBoundary **boundaries, int num)
+size_t geo_boundary_array_data_size(const GeoBoundary *boundaries, int num)
 {
-	/* byte order + type + # of polygons */
-	size_t size = WKB_BYTE_SIZE + WKB_INT_SIZE * 2;
+	/* byte order + type + srid + # of polygons */
+	size_t size = WKB_BYTE_SIZE + WKB_INT_SIZE * 3;
 	for (int i = 0; i < num; i++)
-		size += geo_boundary_data_size(boundaries[i]);
+		size += geo_boundary_data_size(&boundaries[i]);
 	return size;
 }
 
@@ -113,16 +113,18 @@ size_t geo_boundary_data_size(const GeoBoundary *boundary)
 	return size;
 }
 
-uint8* wkb_write_geo_boundary_array_data(uint8 *data, const GeoBoundary **boundaries, int num)
+uint8* wkb_write_geo_boundary_array_data(uint8 *data, const GeoBoundary *boundaries, int num)
 {
 	/* byte order */
 	data = wkb_write_endian(data);
 	/* type */
-	data = wkb_write_int(data, WKB_MULTIPOLYGON_TYPE);
+	data = wkb_write_int(data, WKB_MULTIPOLYGON_TYPE | WKB_SRID_FLAG);
+	/* SRID */
+	data = wkb_write_int(data, WKB_SRID_DEFAULT);
 	/* # of polygons */
 	data = wkb_write_int(data, num);
 	for (int i = 0; i < num; i++)
-		data = wkb_write_geo_boundary_data(data, boundaries[i]);
+		data = wkb_write_geo_boundary_data(data, &boundaries[i]);
 	return data;
 }
 

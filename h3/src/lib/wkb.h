@@ -4,7 +4,7 @@
 #include <postgres.h>
 #include <h3api.h>
 
-bytea* geo_boundary_array_to_wkb(const GeoBoundary **boundaries, size_t num);
+bytea* geo_boundary_array_to_wkb(const GeoBoundary *boundaries, size_t num);
 bytea* geo_boundary_to_wkb(const GeoBoundary *boundary);
 
 #endif

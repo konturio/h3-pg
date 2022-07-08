@@ -27,7 +27,6 @@ PG_FUNCTION_INFO_V1(h3_geo_to_h3);
 PG_FUNCTION_INFO_V1(h3_to_geo);
 PG_FUNCTION_INFO_V1(h3_to_geo_boundary);
 
-static bytea* geo_boundary_to_wkb_split(GeoBoundary *boundary, bool extend);  /* TODO: remove this function */
 static void geo_boundary_to_degs(GeoBoundary *boundary, bool extend);
 static bool geo_boundary_crosses_180(const GeoBoundary *boundary);
 static void geo_boundary_split_180(const GeoBoundary *boundary, GeoBoundary *left, GeoBoundary *right);
@@ -82,24 +81,23 @@ h3_to_geo_boundary(PG_FUNCTION_ARGS)
 	H3Index		idx = PG_GETARG_H3INDEX(0);
 	bool		extend = PG_GETARG_BOOL(1);
 	GeoBoundary boundary;
+	bytea		*wkb;
 
 	h3ToGeoBoundary(idx, &boundary);
 
-	PG_RETURN_BYTEA_P(geo_boundary_to_wkb_split(&boundary, extend));
-}
+	geo_boundary_to_degs(&boundary, extend);
+	if (geo_boundary_crosses_180(&boundary))
+	{
+		GeoBoundary boundaries[2];
+		geo_boundary_split_180(&boundary, &boundaries[0], &boundaries[1]);
+		wkb = geo_boundary_array_to_wkb(boundaries, 2);
+	}
+	else
+	{
+		wkb = geo_boundary_to_wkb(&boundary);
+	}
 
-bytea* geo_boundary_to_wkb_split(GeoBoundary *boundary, bool extend)
-{
-	GeoBoundary left, right;
-	const GeoBoundary *boundaries[2] = {&left, &right};
-
-    geo_boundary_to_degs(boundary, extend);
-
-	if (!geo_boundary_crosses_180(boundary))
-		return geo_boundary_to_wkb(boundary);
-
-	geo_boundary_split_180(boundary, &left, &right);
-	return geo_boundary_array_to_wkb(boundaries, 2);
+	PG_RETURN_BYTEA_P(wkb);
 }
 
 void geo_boundary_to_degs(GeoBoundary *boundary, bool extend)
