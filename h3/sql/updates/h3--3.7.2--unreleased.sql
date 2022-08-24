@@ -16,3 +16,16 @@
 
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "ALTER EXTENSION h3 UPDATE TO 'unreleased'" to load this file. \quit
+
+DROP FUNCTION IF EXISTS h3_to_geo_boundary(h3index, BOOLEAN);
+
+CREATE FUNCTION h3_to_geo_boundary(h3index, split_at_meridian BOOLEAN DEFAULT FALSE) RETURNS bytea
+    AS 'h3' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
+    COMMENT ON FUNCTION h3_to_geo_boundary(h3index, boolean) IS
+'Finds the boundary of the index, returns EWKB, second argument splits polygon when crossing 180th meridian';
+
+CREATE OR REPLACE FUNCTION h3_to_geo_boundary_geometry(h3index, extend BOOLEAN DEFAULT FALSE) RETURNS geometry
+  AS $$ SELECT ST_SetSRID(h3_to_geo_boundary($1, $2)::geometry, 4326) $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;
+
+CREATE OR REPLACE FUNCTION h3_to_geo_boundary_geography(h3index, extend BOOLEAN DEFAULT FALSE) RETURNS geography
+  AS $$ SELECT h3_to_geo_boundary_geometry($1, $2)::geography $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;

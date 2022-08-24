@@ -32,7 +32,7 @@ CREATE OR REPLACE FUNCTION h3_to_geo(h3index) RETURNS point
 'Finds the centroid of the index';
 
 --@ availability: 1.0.0
-CREATE OR REPLACE FUNCTION h3_to_geo_boundary(h3index, extend_at_meridian BOOLEAN DEFAULT FALSE) RETURNS polygon
+CREATE OR REPLACE FUNCTION h3_to_geo_boundary(h3index, split_at_meridian BOOLEAN DEFAULT FALSE) RETURNS bytea
     AS 'h3' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE;
     COMMENT ON FUNCTION h3_to_geo_boundary(h3index, boolean) IS
-'Finds the boundary of the index, second argument extends coordinates when crossing 180th meridian to help visualization';
+'Finds the boundary of the index, returns EWKB, second argument splits polygon when crossing 180th meridian';
