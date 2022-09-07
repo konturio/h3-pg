@@ -5,7 +5,10 @@
 #include <h3api.h>
 #include <fmgr.h>
 
-bytea* boundary_array_to_wkb(const CellBoundary *boundaries, size_t num);
-bytea* boundary_to_wkb(const CellBoundary *boundary);
+bytea*
+boundary_array_to_wkb(const CellBoundary *boundaries, size_t num);
+
+bytea*
+boundary_to_wkb(const CellBoundary *boundary);
 
 #endif

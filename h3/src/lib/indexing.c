@@ -207,7 +207,7 @@ boundary_crosses_180(const CellBoundary *boundary)
 	{
 		int cur = v % numVerts;
 		double lon = verts[cur].lng;
-        int sign = SIGN(lon);
+		int sign = SIGN(lon);
 
 		if (prevSign == 0)
 		{
