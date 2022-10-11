@@ -18,7 +18,9 @@
 \echo Use "ALTER EXTENSION h3 UPDATE TO 'unreleased'" to load this file. \quit
 
 CREATE OR REPLACE FUNCTION
-    h3_cells_to_multi_polygon_wkb(h3index[], split_at_meridian boolean DEFAULT FALSE) RETURNS bytea
+    h3_cells_to_multi_polygon_wkb(h3index[]) RETURNS bytea
 AS 'h3' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE; COMMENT ON FUNCTION
-    h3_cells_to_multi_polygon_wkb(h3index[], boolean)
-IS 'Create a LinkedGeoPolygon describing the outline(s) of a set of hexagons, convert to EWKB, second argument split polygons crossing 180th meridian.';
+    h3_cells_to_multi_polygon_wkb(h3index[])
+IS 'Create a LinkedGeoPolygon describing the outline(s) of a set of hexagons, converts to EWKB.
+
+Splits polygons when crossing 180th meridian.';

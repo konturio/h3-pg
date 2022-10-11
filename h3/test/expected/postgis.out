@@ -96,7 +96,7 @@ WHERE ABS(ABS(ST_X(p)) - 180) < :epsilon;
 -- polygon is split in 4 polygons with 1 hole each
 WITH split AS (
          SELECT h3_cells_to_multi_polygon_wkb(
-             array(SELECT h3_polygon_to_cells(:transmeridianWithHoles, 4)), true)::geometry AS multi),
+             array(SELECT h3_polygon_to_cells(:transmeridianWithHoles, 4)))::geometry AS multi),
      dp AS (SELECT ST_Dump(multi) AS dp FROM split),
      polygons AS (SELECT (dp).geom AS geom FROM dp)
 SELECT GeometryType(geom) LIKE 'POLYGON' AND ST_NumInteriorRings(geom) = 1
@@ -109,7 +109,7 @@ FROM polygons;
 -- multipolygon with 2 polygons becomes multipolygon with 3
 WITH split AS (
         SELECT h3_cells_to_multi_polygon_wkb(
-            array(SELECT h3_polygon_to_cells(:transmeridianMulti, 3)), true)::geometry AS multi),
+            array(SELECT h3_polygon_to_cells(:transmeridianMulti, 3)))::geometry AS multi),
      dp AS (SELECT ST_Dump(multi) AS dp FROM split)
 SELECT COUNT(*) = 3 FROM dp;
  t

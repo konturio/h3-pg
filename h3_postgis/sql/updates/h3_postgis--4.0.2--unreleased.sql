@@ -17,12 +17,10 @@
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
 \echo Use "ALTER EXTENSION h3 UPDATE TO 'unreleased'" to load this file. \quit
 
---@ availability: unreleased
 CREATE OR REPLACE FUNCTION
-    h3_cells_to_multi_polygon_geometry(h3index[], split_at_meridian boolean DEFAULT FALSE) RETURNS geometry
-AS $$ SELECT h3_cells_to_multi_polygon_wkb($1, $2)::geometry $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;
+    h3_cells_to_multi_polygon_geometry(h3index[]) RETURNS geometry
+AS $$ SELECT h3_cells_to_multi_polygon_wkb($1)::geometry $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;
 
---@ availability: unreleased
 CREATE OR REPLACE FUNCTION
-    h3_cells_to_multi_polygon_geography(h3index[], split_at_meridian boolean DEFAULT FALSE) RETURNS geography
-AS $$ SELECT h3_cells_to_multi_polygon_wkb($1, $2)::geography $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;
+    h3_cells_to_multi_polygon_geography(h3index[]) RETURNS geography
+AS $$ SELECT h3_cells_to_multi_polygon_wkb($1)::geography $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;

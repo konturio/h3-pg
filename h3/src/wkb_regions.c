@@ -19,8 +19,6 @@ Datum
 h3_cells_to_multi_polygon_wkb(PG_FUNCTION_ARGS)
 {
 	ArrayType	*array = PG_GETARG_ARRAYTYPE_P(0);
-	bool		split = PG_GETARG_BOOL(1);
-
 	LinkedGeoPolygon *linkedPolygon;
 	H3Error	error;
 	int 		numHexes;
@@ -47,7 +45,7 @@ h3_cells_to_multi_polygon_wkb(PG_FUNCTION_ARGS)
 	error = cellsToLinkedMultiPolygon(h3set, numHexes, linkedPolygon);
 	H3_ERROR(error, "cellsToLinkedMultiPolygon");
 
-	if (split && is_linked_polygon_crossed_by_180(linkedPolygon))
+	if (is_linked_polygon_crossed_by_180(linkedPolygon))
 	{
 		/* Split by 180th meridian */
 		LinkedGeoPolygon *splitPolygon = split_linked_polygon_by_180(linkedPolygon);
