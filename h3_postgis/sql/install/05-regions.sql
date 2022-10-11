@@ -52,7 +52,7 @@ CREATE OR REPLACE FUNCTION
 AS $$ SELECT h3_cells_to_multi_polygon_wkb($1)::geography $$ IMMUTABLE STRICT PARALLEL SAFE LANGUAGE SQL;
 
 --@ availability: unreleased
-CREATE AGGREGATE h3_cells_to_multi_polygon_geometry(h3index) (
+CREATE OR REPLACE AGGREGATE h3_cells_to_multi_polygon_geometry(h3index) (
     sfunc = array_append,
     stype = h3index[],
     finalfunc = h3_cells_to_multi_polygon_geometry,
@@ -60,7 +60,7 @@ CREATE AGGREGATE h3_cells_to_multi_polygon_geometry(h3index) (
 );
 
 --@ availability: unreleased
-CREATE AGGREGATE h3_cells_to_multi_polygon_geography(h3index) (
+CREATE OR REPLACE AGGREGATE h3_cells_to_multi_polygon_geography(h3index) (
     sfunc = array_append,
     stype = h3index[],
     finalfunc = h3_cells_to_multi_polygon_geography,
