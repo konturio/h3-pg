@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Bytes & Brains
+ * Copyright 2019 Bytes & Brains
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,19 +14,9 @@
  * limitations under the License.
  */
 
--- complain if script is sourced in psql, rather than via CREATE EXTENSION
-\echo Use "ALTER EXTENSION h3 UPDATE TO 'unreleased'" to load this file. \quit
-
-CREATE OR REPLACE FUNCTION
-    h3_cells_to_multi_polygon_wkb(h3index[]) RETURNS bytea
-AS 'h3' LANGUAGE C IMMUTABLE STRICT PARALLEL SAFE; COMMENT ON FUNCTION
-    h3_cells_to_multi_polygon_wkb(h3index[])
-IS 'Create a LinkedGeoPolygon describing the outline(s) of a set of hexagons, converts to EWKB.
-
-Splits polygons when crossing 180th meridian.';
-
-
 -- BRIN operator class
+
+--@ internal
 CREATE OPERATOR CLASS brin_h3index_ops DEFAULT FOR TYPE h3index USING brin AS
     OPERATOR  1  <  ,
     OPERATOR  2  <= ,
@@ -38,4 +28,3 @@ CREATE OPERATOR CLASS brin_h3index_ops DEFAULT FOR TYPE h3index USING brin AS
     FUNCTION  3  brin_minmax_multi_consistent,
     FUNCTION  4  brin_minmax_multi_union,
     FUNCTION 11  brin_minmax_multi_distance_int8;
-
