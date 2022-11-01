@@ -23,7 +23,7 @@ CREATE OPERATOR CLASS brin_h3index_ops DEFAULT FOR TYPE h3index USING brin AS
     OPERATOR  3   = ,
     OPERATOR  4  >= ,
     OPERATOR  5  >  ,
-    FUNCTION  1  brin_minmax_opcinfo,
-    FUNCTION  2  brin_minmax_add_value,
-    FUNCTION  3  brin_minmax_consistent,
-    FUNCTION  4  brin_minmax_union;
+    FUNCTION  1  brin_minmax_opcinfo(internal),
+    FUNCTION  2  brin_minmax_add_value(internal, internal, internal, internal),
+    FUNCTION  3  brin_minmax_consistent(internal, internal, internal),
+    FUNCTION  4  brin_minmax_union(internal, internal, internal);
