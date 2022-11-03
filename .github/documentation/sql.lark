@@ -110,7 +110,7 @@ comment_on_type: "CAST" "(" DATATYPE "AS" DATATYPE ")" -> comment_on_cast
 // -----------------------------------------------------------------------------
 // SIMPLE RULES
 argument: [ARGMODE] [CNAME] DATATYPE "[]"? ("DEFAULT" expr)?
-ARGMODE.1: "IN" | "OUT" | "INOUT"
+ARGMODE.2: "IN" | "OUT" | "INOUT"
 DATATYPE_SCALAR: "h3index"
         | "bigint"
         | "boolean"
@@ -120,11 +120,11 @@ DATATYPE_SCALAR: "h3index"
         | "geography"
         | "geometry"
         | "bytea"
-        | "int"
         | "int32"
         | "int8"
         | "integer"
         | "internal"
+        | "int"
         | "point"
         | "polygon"
         | "record"
