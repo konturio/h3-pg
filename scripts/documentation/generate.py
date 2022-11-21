@@ -5,16 +5,12 @@ import sys
 from pathlib import Path
 from lark import Lark, Transformer, v_args, visitors
 
-TocIndent = 2
-
+# see PGXN::API::Indexer::_clean_html_body
 def to_anchor(text):
-    text = re.sub(r"[^\w\s-]", "", text)
-    text = re.sub(r"\s", "-", text)
-    return "#" + text.lower()
-
-def toc_item(text, level=0):
-    link = "[{}]({})".format(text, to_anchor(text))
-    return " " * (TocIndent * level) + "- " + link
+    text = re.sub(r"[^\w\s\(\)-]", "", text) # approximating processing done in Text::Markdown
+    text = re.sub(r"^([^a-zA-Z])", r"L\1", text)
+    text = re.sub(r"[^a-zA-Z0-9_:.-]+", ".", text)
+    return "#" + text
 
 def md_heading(text, level=0):
     return "#" * (level + 1) + " " + text
@@ -70,11 +66,6 @@ class StmtBase:
 
     def to_ref(self):
         return '<a href="{}">{}</a>'.format(self.get_anchor(), self.get_ref_text())
-
-    def to_toc(self, context):
-        if not self.is_visible() or self.level < 0:
-            return ""
-        return toc_item(str(self), min(context.level + 1, self.level))
 
     def to_md(self, context):
         if not self.is_visible():
@@ -149,11 +140,6 @@ class CustomMd(StmtBase):
     def update_level(self, context):
         if self.level > -1:
             context.level = max(0, self.level)
-
-    def to_toc(self, context):
-        toc = super().to_toc(context)
-        self.update_level(context)
-        return toc
 
     def __str__(self):
         return self.line
@@ -373,10 +359,6 @@ def parse_file(parser, path):
         statements = SQLTransformer(visit_tokens=True).transform(tree)
         return statements
 
-def statements_to_toc(statements, context):
-    items = [stmt.to_toc(context) for stmt in statements]
-    return [item for item in items if len(item) > 0]
-
 def statements_to_md(statements, context):
     items = [stmt.to_md(context) for stmt in statements]
     return [item for item in items if len(item) > 0]
@@ -394,19 +376,12 @@ def main():
         groups.append(group)
 
     # Output
-    toc = ""
     md = ""
     for group in groups:
         [header, statements] = group
-        toc += toc_item(header) + "\n"
-        toc += "\n".join(statements_to_toc(statements, Context())) + "\n"
         md += md_heading(header) + "\n"
         md += "\n".join(statements_to_md(statements, Context(statements_by_refid))) + "\n"
 
-    print("<!-- start table of contents -->");
-    print("**\n\n")
-    print(toc)
-    print("<!-- end table of contents -->\n\n");
     print(md)
 
 if __name__ == "__main__":
