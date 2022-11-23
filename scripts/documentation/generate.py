@@ -248,17 +248,21 @@ class SQLTransformer(Transformer):
     def custom_md_statement(self, children):
         return children
 
+    # -- MARKDOWN --------------------------------------------------------------
     @v_args(inline=True)
     def custom_markdown(self, line=""):
         return CustomMd(line)
 
+    # -- CREATE TYPE -----------------------------------------------------------
     def create_type_stmt(self, children):
         return CreateTypeStmt()
 
+    # -- CREATE CAST -----------------------------------------------------------
     @v_args(inline=True)
     def create_cast_stmt(self, source, target, *children):
         return CreateCastStmt(source, target)
 
+    # -- CREATE OPERATOR -------------------------------------------------------
     @v_args(inline=True)
     def create_oper_stmt(self, name, options):
         return CreateOperatorStmt(name, options['LEFTARG'], options['RIGHTARG'])
@@ -270,12 +274,7 @@ class SQLTransformer(Transformer):
     def create_oper_opt(self, option, value=None):
         return [str(option), value]
 
-    def create_opcl_stmt(self, children):
-        raise visitors.Discard()
-
-    def fun_name(self, children):
-        return children[1]
-
+    # -- CREATE FUNCTION -------------------------------------------------------
     def create_fun_rettype(self, children):
         # (returntype, returns_set)
         return (children[1], children[0] is not None)
@@ -287,10 +286,17 @@ class SQLTransformer(Transformer):
             raise visitors.Discard()
         return CreateFunctionStmt(name, arguments, returntype[0], returntype[1])
 
+    # -- CREATE AGGREGATE ------------------------------------------------------
     @v_args(inline=True)
     def create_agg_stmt(self, name: str, arguments, *params):
         return CreateAggregateStmt(name, arguments)
 
+    # -- CREATE COMMENT --------------------------------------------------------
+    @v_args(inline=True)
+    def comment_on_stmt(self, child, text):
+        return CreateCommentStmt(text)
+
+    # -- FUNCTION OR AGGREGATE ARGUMENTS ---------------------------------------
     def argument_list(self, children):
         return children
 
@@ -298,17 +304,24 @@ class SQLTransformer(Transformer):
     def argument(self, argmode, name, argtype, default=None):
         return Argument(argmode, name, argtype, default)
 
-    @v_args(inline=True)
-    def comment_on_stmt(self, child, text):
-        return CreateCommentStmt(text)
+    # -- CREATE OPERATOR CLASS -------------------------------------------------
+    def create_opcl_stmt(self, children):
+        raise visitors.Discard()
+
+    # -- SIMPLE RULES ----------------------------------------------------------
 
     true = lambda self, _: "`true`"
     false = lambda self, _: "`false`"
     number = v_args(inline=True)(int)
 
+    def fun_name(self, children):
+        return children[1]
+
     @v_args(inline=True)
     def string(self, s):
         return s[1:-1].replace('\\"', '"')
+
+    # -- TERMINALS -------------------------------------------------------------
 
     def SIGNED_NUMBER(self, children):
         return int(children)
